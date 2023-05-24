@@ -1,5 +1,5 @@
 {
-  "name": "node_tunel",
+  "name": "node",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "express-ws": "^5.0.2"
+    "ejs": "^3.1.9",
+    "express": "^4.17.1",
+    "express-ws": "^5.0.2",
+    "socket.io": "^1.2.0"
   }
 }
