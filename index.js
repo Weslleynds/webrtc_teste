@@ -10,15 +10,52 @@ var expressWs = require("express-ws");
 var expressWs = expressWs(express());
 var app = expressWs.app;
 
+
+function getUniqueID() {
+  function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  }
+  return s4() + s4() + '-' + s4();
+};
+
 app.ws("/testews", function (ws, req) {
+
+  ws.id = getUniqueID();
+  console.log("Cliente conectado: " + ws.id);
+
+  // ws.send(JSON.stringify({tipo: 'id', dados: { msg: id}}));
+
   ws.on("message", function (msg) {
-    var aWss = expressWs.getWss('/testews');
-    aWss.clients.forEach(function (client) {
-      client.send(msg);
+
+    const msgJ = JSON.parse(msg);
+    msgJ.idClient = ws.id;
+    console.log(ws.id);
+    
+    var aWss = expressWs.getWss('/testewsf');
+      aWss.clients.forEach(function (client) {
+        client.send(JSON.stringify(msgJ));
+      });
     });
-  });
 });
 
+app.ws("/testewsf", function (ws, req) {
+  ws.id = getUniqueID();
+
+  console.log("FRIGATE conectado: " + ws.id);
+  
+  ws.on("message", function (msg) {
+
+    const msgJ = JSON.parse(msg);
+    console.log(msgJ);
+
+    var aWss = expressWs.getWss('/testews');
+      aWss.clients.forEach(function (client) {
+        if (msgJ.tipo == "teste" || client.id == msgJ.idClient) {
+          client.send(msg);
+        }
+      });
+  });
+});
 
 //Define the folder which contains the CSS and JS for the fontend
 app.use(express.static("public"));

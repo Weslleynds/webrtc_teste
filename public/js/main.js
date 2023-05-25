@@ -62,14 +62,14 @@ function handlePcvideo(event) {
             video.srcObject = ms;
             play();
 
-            sendMessageClient({tipo: "fechar"});
+            sendMessageClient({tipo: "fechar", idClient: client.id, entidade: 'u'});
 
         } else {
             console.log("elseeees");
             pc.close();
             pc = null;
 
-            sendMessageClient({tipo: "fechar"});
+            sendMessageClient({tipo: "fechar", idClient: client.id, entidade: 'u'});
         }
   }
 
@@ -125,9 +125,15 @@ function iniciar() {
       log(m.data);
       const msg = JSON.parse(m.data);
       console.log(msg);
+
+      client.id = "w";
       
-    
-      if (msg.tipo == "mensagemDoFrigate") {
+      if (msg.tipo == "id") {
+        client.id = msg.dados.msg;
+        //sendMessageClient({tipo: "salvar", idClient: client.id, frigate: false});
+        // sendMessageClient({tipo: "iniciar", idClient: client.id, entidade: 'u'});
+      }
+      else if (msg.tipo == "mensagemDoFrigate") {
         switch (msg.dados.msg.type) {
           case "open":
                 createPeerConnection();
@@ -150,7 +156,7 @@ function iniciar() {
             pc.close();
         }
       }
-      
+
     });
 }
 
@@ -171,7 +177,7 @@ function createPeerConnection() {
   
       pc.createOffer().then(offer => {
           pc.setLocalDescription(offer).then(() => {
-            sendMessageClient({tipo: "mensagemParaFrigate", dados: { msg: {type: "webrtc/offer", value: offer.sdp}}});
+            sendMessageClient({tipo: "mensagemParaFrigate", idClient: client.id, entidade: 'u', dados: { msg: {type: "webrtc/offer", value: offer.sdp}}});
           });
       });
   
@@ -186,7 +192,7 @@ function createPeerConnection() {
   function handleIceCandidate(event) {
     logFrigate("icecandidate event: ", event);
     const candidate = event.candidate ? event.candidate.toJSON().candidate : "";
-    sendMessageClient({tipo: "mensagemParaFrigate", dados: { msg: {type: "webrtc/candidate", value: candidate}}});
+    sendMessageClient({tipo: "mensagemParaFrigate", idClient: client.id, entidade: 'u', dados: { msg: {type: "webrtc/candidate", value: candidate}}});
   }
   
   function handleTrack(event) {
@@ -210,7 +216,22 @@ function createPeerConnection() {
   }
   
   function handleConnectionstatechange(event) {
+
     logFrigate("handleConnectionstatechange");
-    logFrigate(event);
     logFrigate(pc.connectionState);
+    console.log(event);
+
+    if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+      pc.close(); // stop next events
+      pc = null;
+
+      iniciar();
+    }
   }
+
+  function getUniqueID() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    }
+    return s4() + s4() + '-' + s4();
+  };
