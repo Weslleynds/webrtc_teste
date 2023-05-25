@@ -97,17 +97,18 @@ var logFrigate = function (m) {
   i.innerText = new Date().toISOString() + " FRIGATE: " + m;
   l.appendChild(i);
 };
-log("opening websocket connection");
 /* PARTE LOG */
 
 
 
 function iniciar() {
-    //client = new WebSocket("ws://localhost:8080/testews");
+    //client = new WebSocket("ws://192.168.1.47:8080/testews");
 
     let url = document.getElementById("url").value;
 
     console.log(url);
+
+    log("opening websocket connection");
 
     client = new WebSocket(url);
 
@@ -124,6 +125,7 @@ function iniciar() {
       log(m.data);
       const msg = JSON.parse(m.data);
       console.log(msg);
+      
     
       if (msg.tipo == "mensagemDoFrigate") {
         switch (msg.dados.msg.type) {
@@ -148,6 +150,7 @@ function iniciar() {
             pc.close();
         }
       }
+      
     });
 }
 
