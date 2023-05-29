@@ -30,6 +30,8 @@ app.ws("/testews", function (ws, req) {
     const msgJ = JSON.parse(msg);
     msgJ.idClient = ws.id;
     console.log(ws.id);
+    console.log(msgJ);
+    console.log(msgJ.tipo);
     
     var aWss = expressWs.getWss('/testewsf');
       aWss.clients.forEach(function (client) {
@@ -38,7 +40,7 @@ app.ws("/testews", function (ws, req) {
     });
 });
 
-app.ws("/testewsf", function (ws, req) {
+app.ws("/testewsfa", function (ws, req) {
   ws.id = getUniqueID();
 
   console.log("FRIGATE conectado: " + ws.id);
@@ -57,6 +59,38 @@ app.ws("/testewsf", function (ws, req) {
   });
 });
 
+app.ws("/testewsf2", function (ws, req) {
+  ws.id = getUniqueID();
+  ws.on("message", function (msg) {
+
+    // const msgJ = JSON.parse(msg);
+    console.log(msg);
+
+    var aWss = expressWs.getWss('/testewsf3');
+      aWss.clients.forEach(function (client) {
+        // if (msgJ.tipo == "teste" || client.id == msgJ.idClient) {
+          client.send(msg);
+        // }
+      });
+  });
+});
+
+app.ws("/testewsf3", function (ws, req) {
+  ws.id = getUniqueID();
+  ws.on("message", function (msg) {
+
+    // const msgJ = JSON.parse(msg);
+    console.log(msg);
+
+    var aWss = expressWs.getWss('/testewsf2');
+      aWss.clients.forEach(function (client) {
+        //if (msgJ.tipo == "teste" || client.id == msgJ.idClient) {
+          client.send(msg);
+        //}
+      });
+  });
+});
+
 //Define the folder which contains the CSS and JS for the fontend
 app.use(express.static("public"));
 
@@ -64,6 +98,11 @@ app.use(express.static("public"));
 app.get("/", function (req, res) {
   //Render a view (located in the directory views/) on this route
   res.render("index.ejs");
+});
+
+app.get("/2", function (req, res) {
+  //Render a view (located in the directory views/) on this route
+  res.render("index2.ejs");
 });
 
 //Initialize http server and associate it with express
